@@ -1,0 +1,6 @@
+usr/include/MEDimport.h
+usr/include/MEDimport.hxx
+usr/include/medimport_win_dll.h
+usr/include/medimportcxx_win_dll.h
+usr/lib/*/libmedimport.a
+usr/lib/*/libmedimport.so

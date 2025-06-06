@@ -1,0 +1,6 @@
+usr/include/2.3.6/*.hxx
+usr/include/2.3.6/*.h
+usr/include/*.hxx
+usr/include/*.h
+usr/lib/*/libmedC.a
+usr/lib/*/libmedC.so

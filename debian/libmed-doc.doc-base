@@ -1,0 +1,9 @@
+Document: libmed-doc
+Title: Documentation de la bibliothèque MED-fichier v2.2
+Author: Eric Fayolle and Vincent Lefebvre
+Abstract: This is the documentation of the med-fichier library (in French). It includes a reference guide, a user's guide and a tutorial.
+Section: Science/Data Analysis
+
+Format: HTML
+Index: /usr/share/doc/libmed-doc/med/index.html
+Files: /usr/share/doc/libmed-doc/med/*.html

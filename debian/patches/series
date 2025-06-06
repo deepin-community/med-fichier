@@ -1,0 +1,8 @@
+build-doc.patch
+reproducible-builds.patch
+tests-fix-diff-filters.patch
+check_hdf5.patch
+fix-stack-smashing-in-test.patch
+hdf5-1.14.patch
+fix-swig-deprecated-python.patch
+swig-4.3.patch
