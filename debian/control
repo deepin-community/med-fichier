@@ -92,7 +92,7 @@ Architecture: any
 Multi-Arch: same
 Section: libdevel
 Depends: libhdf5-mpi-dev,
-         libmedc11t64 (= ${binary:Version}),
+         libmedc11 (= ${binary:Version}),
          ${misc:Depends}
 Pre-Depends: ${misc:Pre-Depends}
 Description: Development files for libmedc
@@ -103,8 +103,7 @@ Description: Development files for libmedc
  This package contains the header files and static library needed to
  compile applications that use libmedC.
 
-Package: libmedc11t64
-Provides: ${t64:Provides}
+Package: libmedc11
 Architecture: any
 Multi-Arch: same
 Section: libs
@@ -113,8 +112,6 @@ Depends: ${misc:Depends},
 Suggests: libmed-doc,
           libmed-tools
 Pre-Depends: ${misc:Pre-Depends}
-Breaks: libmedc11 (<< ${source:Version}), libmedc1, libmedc1v5 (= 4.0.0+repack-1)
-Replaces: libmedc11, libmedc1, libmedc1v5 (= 4.0.0+repack-1)
 Description: Library to exchange meshed data (C version)
  MED-fichier (Modélisation et Echanges de Données, in English Modelisation
  and Data Exchange) is a library to store and exchange meshed data or
@@ -143,7 +140,7 @@ Package: libmedimport0v5
 Architecture: any
 Multi-Arch: same
 Section: libs
-Depends: libmedc11t64,
+Depends: libmedc11,
          ${misc:Depends},
          ${shlibs:Depends}
 Suggests: libmed-doc,
