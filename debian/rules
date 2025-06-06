@@ -1,4 +1,78 @@
 #!/usr/bin/make -f
-
 %:
 	dh $@
+
+# Which MPI implementation?
+# set ARCH_DEFAULT_MPI_IMPL
+include /usr/share/mpi-default-dev/debian_defaults
+
+export OMPI_MCA_orte_rsh_agent=/bin/false                #workaround to start MPI-applications in chroot
+export DEB_CPPFLAGS_MAINT_APPEND := $(filter -I%,$(shell mpicc.$(ARCH_DEFAULT_MPI_IMPL) -show)) -DOMPI_SKIP_MPICXX=1 -DMPICH_SKIP_MPICXX=1 -DH5_USE_110_API
+export DEB_LDFLAGS_MAINT_APPEND := -Wl,--as-needed
+
+# Workaround for FTBFS with GCC-10:
+# Error: Type mismatch between actual argument at (1) and actual argument at (2)
+export DEB_FFLAGS_MAINT_APPEND := -fallow-argument-mismatch
+
+CONFIGURE_FLAGS = --enable-python --with-swig=yes --with-hdf5=/usr/lib/$(DEB_HOST_MULTIARCH)/hdf5/$(ARCH_DEFAULT_MPI_IMPL) --with-hdf5-bin=/usr/bin
+
+PY3VERS=$(shell py3versions -vr)
+PY3DEF=$(shell py3versions -dv)
+
+override_dh_auto_clean:
+	[ ! -f doc/html.dox/Makefile ] || make -C doc/html.dox maintainer-clean-local
+	dh_auto_clean
+	rm -fr build.* debian/tmp.*
+	[ ! -f doc/dox/examples.dox.orig ] || mv doc/dox/examples.dox.orig doc/dox/examples.dox
+	[ ! -f swig-files.tar.gz ] || ( tar xf swig-files.tar.gz && rm swig-files.tar.gz )
+
+my_configure_common: SWIG_FILES = python/*_wrap.cc python/swig_runtime.h
+my_configure_common:
+	cp doc/dox/examples.dox doc/dox/examples.dox.orig
+	tar cf swig-files.tar.gz $(SWIG_FILES)
+	rm -f $(SWIG_FILES)
+
+my_configure_python%: pyver=$(patsubst my_configure_python%,%,$@)
+my_configure_python%: my_configure_common
+	PYTHON=/usr/bin/python$(pyver) dh_auto_configure -Bbuild.python$(pyver) -- $(CONFIGURE_FLAGS)
+
+override_dh_auto_configure: $(foreach pyver,$(PY3VERS), my_configure_python$(pyver))
+
+my_build_python%: pyver=$(patsubst my_build_python%,%,$@)
+my_build_python%:
+	dh_auto_build -Bbuild.python$(pyver)
+
+override_dh_auto_build-arch: $(foreach pyver,$(PY3VERS), my_build_python$(pyver))
+
+override_dh_auto_build-indep:
+	dh_auto_build -Bbuild.python$(PY3DEF)/doc/html.dox -- html-local
+
+my_install_python%: pyver=$(patsubst my_install_python%,%,$@)
+my_install_python%:
+	dh_auto_install -Bbuild.python$(pyver)
+
+override_dh_auto_install-arch: $(foreach pyver,$(PY3VERS), my_install_python$(pyver))
+	find debian/tmp/usr/lib/python* \( -name \*.py[co] -o -name \*.la \) -delete
+	rm -rf debian/tmp/usr/bin/test* \
+	       debian/tmp/usr/bin/usescases \
+	       debian/tmp/usr/bin/unittests
+
+override_dh_auto_install-indep:
+	dh_auto_install -Bbuild.python$(PY3DEF)/doc/html.dox
+
+override_dh_install:
+	dh_install
+	rm -f debian/libmedc-dev/usr/include/*import*
+
+define my_auto_test
+# $(1): folder to launch the tests from
+	MPIEXEC="mpiexec --allow-run-as-root --oversubscribe -np " dh_auto_test -B$(1) --max-parallel=1
+endef
+
+override_dh_auto_test-arch:
+	# first launch all the tests from the default python3 version's build dir
+	$(call my_auto_test,build.python$(PY3DEF))
+	# then launch the python tests only from the tests/python subdir of each of the other python3 versions' build dir
+	$(foreach pyver,$(filter-out $(PY3DEF),$(PY3VERS)),$(call my_auto_test,build.python$(pyver)/tests/python))
+
+override_dh_auto_test-indep:

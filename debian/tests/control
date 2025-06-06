@@ -1,0 +1,2 @@
+Tests: build1 build2
+Depends: libmedc-dev, build-essential
