@@ -1,3 +1,9 @@
+med-fichier (4.1.0+repack-9deepin1) unstable; urgency=medium
+
+  * revert t64.
+
+ -- lhdjply <lhdjply@126.com>  Fri, 6 Jun 2025 16:23:51 +0800
+
 med-fichier (4.1.0+repack-9) unstable; urgency=medium
 
   * Team Upload
